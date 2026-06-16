@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EcoMind — Carbon Footprint Tracker</title>
+    <meta
+      name="description"
+      content="Track your carbon footprint and get AI-powered tips to reduce it."
+    />
+    <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
+    <link rel="icon" type="image/png" href="./assets/logo.png" />
+    <link rel="apple-touch-icon" href="./assets/logo.png" />
+    <meta name="theme-color" content="#1a2118" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- ── Header + tab navigation ─────────────────────────── -->
+      <header id="app-header">
+        <div class="brand">
+          <img
+            class="brand-logo"
+            src="./assets/logo.png"
+            alt="EcoMind logo"
+            onerror="this.onerror=null;this.src='./assets/favicon.svg'"
+          />
+          <span class="brand-name">EcoMind</span>
+        </div>
+        <nav id="tab-nav" aria-label="Primary">
+          <button class="tab-btn active" data-tab="dashboard">
+            <i class="ti ti-layout-dashboard"></i><span>Dashboard</span>
+          </button>
+          <button class="tab-btn" data-tab="log">
+            <i class="ti ti-circle-plus"></i><span>Log</span>
+          </button>
+          <button class="tab-btn" data-tab="insights">
+            <i class="ti ti-chart-bar"></i><span>Insights</span>
+          </button>
+          <button class="tab-btn" data-tab="coach">
+            <i class="ti ti-message-chatbot"></i><span>Coach</span>
+          </button>
+          <button class="tab-btn" data-tab="settings">
+            <i class="ti ti-settings"></i><span>Settings</span>
+          </button>
+        </nav>
+      </header>
+
+      <!-- ── Tab panels ──────────────────────────────────────── -->
+      <main id="app-main">
+        <section id="tab-dashboard" class="tab-panel"></section>
+        <section id="tab-log" class="tab-panel hidden"></section>
+        <section id="tab-insights" class="tab-panel hidden"></section>
+        <section id="tab-coach" class="tab-panel hidden"></section>
+        <section id="tab-settings" class="tab-panel hidden"></section>
+      </main>
+
+      <!-- ── Toast container ─────────────────────────────────── -->
+      <div id="toast-container" aria-live="polite"></div>
+    </div>
+
+    <!-- ── Onboarding modal ──────────────────────────────────── -->
+    <div id="onboarding-overlay" class="hidden"></div>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>

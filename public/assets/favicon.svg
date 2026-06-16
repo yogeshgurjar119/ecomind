@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a2118"/>
+      <stop offset="1" stop-color="#0f1710"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#bg)"/>
+  <g fill="#52b788">
+    <ellipse cx="29" cy="41" rx="15" ry="18"/>
+    <ellipse cx="25" cy="20" rx="11" ry="9"/>
+    <circle cx="40" cy="13" r="3.4"/>
+    <circle cx="46.5" cy="17.5" r="3"/>
+    <circle cx="51" cy="23.5" r="2.5"/>
+    <circle cx="53.5" cy="31" r="2.1"/>
+  </g>
+  <text x="27" y="47" font-family="Arial, sans-serif" font-weight="700" font-size="15"
+        fill="#0f1710" text-anchor="middle">CO₂</text>
+</svg>

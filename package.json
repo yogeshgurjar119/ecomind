@@ -1,0 +1,24 @@
+{
+  "name": "ecomind-carbon-footprint-tracker",
+  "version": "1.0.0",
+  "description": "EcoMind — a privacy-friendly carbon footprint tracker with AI-powered insights, backed by the NVIDIA NIM API.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "carbon-footprint",
+    "sustainability",
+    "climate",
+    "nvidia-nim",
+    "ai"
+  ],
+  "author": "Yogesh Gurjar",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}

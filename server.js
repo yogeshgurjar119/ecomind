@@ -94,10 +94,13 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Export the app so tests can mount it on an ephemeral port.
+// Default export = the Express app, used as the handler on serverless
+// platforms (e.g. Vercel). Named export is for tests that mount it on a port.
+export default app;
 export { app };
 
-// Start listening only when run directly (`node server.js`), not when imported.
+// Start listening only when run directly (`node server.js`), not when imported
+// by a test or invoked as a serverless handler.
 const isMain =
   process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 

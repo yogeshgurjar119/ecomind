@@ -129,7 +129,9 @@ export function mdToHtml(str) {
     const line = raw.trim();
 
     if (!line) {
-      closeList();
+      // Blank lines separate blocks but must NOT break an active list —
+      // consecutive list items stay in one <ol>/<ul> so numbering (1,2,3…)
+      // doesn't reset. A heading or paragraph below closes the list instead.
       continue;
     }
 

@@ -12,7 +12,7 @@
 import 'dotenv/config';
 import express from 'express';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -94,9 +94,18 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`\n  🌿 EcoMind running at  http://localhost:${PORT}`);
-  console.log(
-    `  AI features: ${hasKey() ? 'enabled ✓' : 'disabled (set NVIDIA_API_KEY in .env)'}\n`
-  );
-});
+// Export the app so tests can mount it on an ephemeral port.
+export { app };
+
+// Start listening only when run directly (`node server.js`), not when imported.
+const isMain =
+  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isMain) {
+  app.listen(PORT, () => {
+    console.log(`\n  🌿 EcoMind running at  http://localhost:${PORT}`);
+    console.log(
+      `  AI features: ${hasKey() ? 'enabled ✓' : 'disabled (set NVIDIA_API_KEY in .env)'}\n`
+    );
+  });
+}

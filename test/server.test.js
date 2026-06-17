@@ -60,12 +60,14 @@ test('requests for missing static files return 404', async () => {
   assert.equal(res.status, 404);
 });
 
-test('extensionless route paths fall back to the SPA shell', async () => {
+test('unknown routes return 404 (no SPA catch-all)', async () => {
   const res = await fetch(`${base}/insights`);
-  assert.equal(res.status, 200);
-  const html = await res.text();
-  assert.match(html, /<!DOCTYPE html>/i);
-  assert.match(html, /EcoMind/);
+  assert.equal(res.status, 404);
+});
+
+test('arbitrary deep paths return 404', async () => {
+  const res = await fetch(`${base}/admin/secret`);
+  assert.equal(res.status, 404);
 });
 
 test('the home page is served', async () => {

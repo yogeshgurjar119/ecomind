@@ -235,14 +235,14 @@ function aqiChip(air) {
   if (!air) return '';
   const cat = aqiCategory(air.aqi);
   return `<span class="aqi-chip" title="US Air Quality Index · PM2.5 ${air.pm25} µg/m³"
-       style="--aqi:${cat.color}">
-       <span class="aqi-dot"></span>AQI ${air.aqi} · ${cat.label}
+       style="--aqi:${cat.color}" aria-label="Air Quality Index ${air.aqi}, ${cat.label}">
+       <span class="aqi-dot" aria-hidden="true"></span>AQI ${air.aqi} · ${cat.label}
      </span>`;
 }
 
 function header(country, place) {
   return `<div class="weather-place">
-      <i class="ti ti-map-pin"></i>
+      <i class="ti ti-map-pin" aria-hidden="true"></i>
       <span>${esc(place.city)}, ${esc(country)}</span>
     </div>`;
 }
@@ -259,9 +259,9 @@ function weatherCard(country, place, d) {
       <div class="weather-side">
         ${header(country, place)}
         <div class="weather-stats">
-          <span title="Feels like"><i class="ti ti-temperature"></i> ${d.feels}°</span>
-          <span title="Humidity"><i class="ti ti-droplet"></i> ${d.humidity}%</span>
-          <span title="Wind speed"><i class="ti ti-wind"></i> ${d.wind} km/h</span>
+          <span title="Feels like" aria-label="Feels like ${d.feels} degrees"><i class="ti ti-temperature" aria-hidden="true"></i> ${d.feels}°</span>
+          <span title="Humidity" aria-label="Humidity ${d.humidity} percent"><i class="ti ti-droplet" aria-hidden="true"></i> ${d.humidity}%</span>
+          <span title="Wind speed" aria-label="Wind ${d.wind} kilometres per hour"><i class="ti ti-wind" aria-hidden="true"></i> ${d.wind} km/h</span>
         </div>
         ${aqiChip(d.air)}
       </div>
@@ -269,9 +269,9 @@ function weatherCard(country, place, d) {
 }
 
 function loadingCard(country, place) {
-  return `<div class="card weather-card">
+  return `<div class="card weather-card" role="status">
       <div class="weather-main">
-        <span class="spinner spinner-dark"></span>
+        <span class="spinner spinner-dark" aria-hidden="true"></span>
         <div class="weather-temp">
           <span class="weather-cond">Loading live weather…</span>
         </div>
@@ -281,9 +281,9 @@ function loadingCard(country, place) {
 }
 
 function errorCard(country, place) {
-  return `<div class="card weather-card">
+  return `<div class="card weather-card" role="status">
       <div class="weather-main">
-        <i class="ti ti-cloud-off weather-icon"></i>
+        <i class="ti ti-cloud-off weather-icon" aria-hidden="true"></i>
         <div class="weather-temp">
           <span class="weather-cond">Weather unavailable</span>
         </div>

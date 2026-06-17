@@ -9,7 +9,28 @@ const KEYS = {
   logs: 'eco_logs',
   settings: 'eco_settings',
   factors: 'eco_country_factors',
+  schema: 'eco_schema_version',
 };
+
+/** Bump when the stored data shape changes; add a migration step below. */
+const SCHEMA_VERSION = 1;
+
+/**
+ * Run once at startup. Keeps a user's stored data forward-compatible across
+ * deploys: a new build NEVER clears history — instead, future schema changes
+ * add an explicit migration step here. Unset/older versions are upgraded
+ * in place, preserving all existing logs and settings.
+ */
+export function migrateStorage() {
+  const stored = parseInt(localStorage.getItem(KEYS.schema) || '0', 10);
+  if (stored === SCHEMA_VERSION) return;
+
+  // No transformations needed yet (v0 → v1 is a no-op that keeps all data).
+  // Future example:
+  //   if (stored < 2) { /* rewrite eco_logs entries in place, don't delete */ }
+
+  localStorage.setItem(KEYS.schema, String(SCHEMA_VERSION));
+}
 
 const DEFAULT_SETTINGS = {
   country: 'India',
@@ -56,8 +77,9 @@ export function clearAllData() {
   localStorage.removeItem(KEYS.logs);
   localStorage.removeItem(KEYS.settings);
   localStorage.removeItem(KEYS.factors);
+  localStorage.removeItem(KEYS.schema);
 }
 
 export function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 11);
 }

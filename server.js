@@ -87,11 +87,17 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Fallback: serve the SPA only for extensionless (route) paths.
-// Requests for missing files (e.g. assets/logo.png) get a real 404.
-app.get('*', (req, res) => {
-  if (path.extname(req.path)) return res.status(404).send('Not found');
+// Serve the app shell at the root only.
+app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Security: EcoMind is a single-page app with in-page tab navigation and no
+// server-side sub-routes. Any URL not matched above (a real static asset, an
+// API endpoint, or the root) is invalid and returns 404 — we never silently
+// serve the app shell for arbitrary paths.
+app.use((_req, res) => {
+  res.status(404).send('Not found');
 });
 
 // Default export = the Express app, used as the handler on serverless

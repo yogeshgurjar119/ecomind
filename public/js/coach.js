@@ -15,8 +15,8 @@ import {
   mdToHtml,
 } from './utils.js';
 import { showToast } from './ui.js';
+import { $, emptyState } from './dom.js';
 
-const $ = (sel, root = document) => root.querySelector(sel);
 let chatHistory = []; // {role, content}
 
 export function renderCoach() {
@@ -29,14 +29,14 @@ export function renderCoach() {
 
     <div class="card">
       <div class="coach-status">
-        <span class="status-dot ${aiOn ? 'ok' : ''}"></span>
+        <span class="status-dot ${aiOn ? 'ok' : ''}" aria-hidden="true"></span>
         <span>${aiOn ? 'Connected' : 'AI not configured — add NVIDIA_API_KEY to .env'}</span>
         <button class="btn btn-secondary" id="clear-chat" style="margin-left:auto;padding:5px 11px">
-          <i class="ti ti-trash"></i> Clear
+          <i class="ti ti-trash" aria-hidden="true"></i> Clear
         </button>
       </div>
 
-      <div class="chat-area" id="chat-area"></div>
+      <div class="chat-area" id="chat-area" role="log" aria-live="polite" aria-label="Conversation with EcoCoach"></div>
 
       <div class="quick-prompts">
         ${QUICK_PROMPTS.map(
@@ -45,9 +45,9 @@ export function renderCoach() {
       </div>
 
       <div class="chat-input-row">
-        <input type="text" id="chat-input" placeholder="Type your message…" ${aiOn ? '' : 'disabled'} />
-        <button class="btn btn-primary" id="chat-send" ${aiOn ? '' : 'disabled'}>
-          <i class="ti ti-send"></i>
+        <input type="text" id="chat-input" placeholder="Type your message…" aria-label="Message EcoCoach" ${aiOn ? '' : 'disabled'} />
+        <button class="btn btn-primary" id="chat-send" aria-label="Send message" ${aiOn ? '' : 'disabled'}>
+          <i class="ti ti-send" aria-hidden="true"></i>
         </button>
       </div>
     </div>
@@ -83,10 +83,7 @@ function renderHistory() {
   const area = $('#chat-area');
   if (!area) return;
   if (!chatHistory.length) {
-    area.innerHTML = `<div class="empty-state">
-      <i class="ti ti-message-chatbot"></i>
-      <p>Start a conversation or tap a suggestion below.</p>
-    </div>`;
+    area.innerHTML = emptyState('ti-message-chatbot', 'Start a conversation or tap a suggestion below.');
     return;
   }
   area.innerHTML = chatHistory
@@ -106,7 +103,8 @@ async function sendCoachMessage(text) {
   const area = $('#chat-area');
   const typing = document.createElement('div');
   typing.className = 'chat-msg assistant';
-  typing.innerHTML = `<span class="spinner spinner-dark"></span>`;
+  typing.innerHTML =
+    '<span class="spinner spinner-dark" aria-hidden="true"></span><span class="sr-only">EcoCoach is typing…</span>';
   area.appendChild(typing);
   area.scrollTop = area.scrollHeight;
 

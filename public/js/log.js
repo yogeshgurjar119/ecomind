@@ -8,8 +8,8 @@ import { callAI, parseJSONArray, isAIEnabled } from './api.js';
 import { calcCO2, today, currentTime, esc } from './utils.js';
 import { showToast, setLoading, shake, showTab } from './ui.js';
 import { renderDashboard } from './dashboard.js';
+import { $ } from './dom.js';
 
-const $ = (sel, root = document) => root.querySelector(sel);
 let pendingAIEntries = [];
 
 export function renderLog() {
@@ -23,25 +23,26 @@ export function renderLog() {
     ${
       aiOn
         ? `<div class="card">
-            <h3 class="section-title" style="margin-top:0"><i class="ti ti-sparkles"></i>Quick AI log</h3>
+            <h2 class="section-title" style="margin-top:0"><i class="ti ti-sparkles" aria-hidden="true"></i>Quick AI log</h2>
             <div class="field">
+              <label for="ai-text">Describe your day</label>
               <textarea id="ai-text" rows="3"
                 placeholder="e.g. drove 25km to office, had chicken for lunch, ordered clothes online"></textarea>
             </div>
-            <button class="btn btn-primary" id="ai-log-btn"><i class="ti ti-wand"></i> Auto-log with AI</button>
+            <button class="btn btn-primary" id="ai-log-btn"><i class="ti ti-wand" aria-hidden="true"></i> Auto-log with AI</button>
             <div id="ai-preview" style="margin-top:12px"></div>
           </div>`
         : `<div class="banner">
-            <i class="ti ti-info-circle"></i>
+            <i class="ti ti-info-circle" aria-hidden="true"></i>
             <span>Add your NVIDIA key to <code>.env</code> to unlock AI auto-logging. Manual logging works without it.</span>
           </div>`
     }
 
     <div class="card" style="margin-top:16px">
-      <h3 class="section-title" style="margin-top:0"><i class="ti ti-edit"></i>Manual log</h3>
+      <h2 class="section-title" style="margin-top:0"><i class="ti ti-edit" aria-hidden="true"></i>Manual log</h2>
       <div class="form-row">
         <div class="field">
-          <label>Category</label>
+          <label for="m-category">Category</label>
           <select id="m-category">
             ${Object.keys(EMISSION_FACTORS)
               .map((c) => `<option value="${c}" style="text-transform:capitalize">${c}</option>`)
@@ -49,26 +50,27 @@ export function renderLog() {
           </select>
         </div>
         <div class="field">
-          <label>Activity</label>
+          <label for="m-activity">Activity</label>
           <select id="m-activity"></select>
         </div>
       </div>
       <div class="form-row">
         <div class="field">
-          <label id="m-qty-label">Quantity</label>
-          <input type="number" id="m-qty" min="0" step="0.1" placeholder="0" />
+          <label id="m-qty-label" for="m-qty">Quantity</label>
+          <input type="number" id="m-qty" min="0" step="0.1" placeholder="0"
+            required aria-required="true" aria-describedby="m-qty-err" />
           <div class="field-error hidden" id="m-qty-err">Enter a quantity greater than 0</div>
         </div>
         <div class="field">
-          <label>Preview</label>
+          <span class="field-label">Preview</span>
           <div style="padding:9px 0"><span class="preview-co2" id="m-preview">= 0.00 kg CO₂e</span></div>
         </div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Date</label><input type="date" id="m-date" value="${today()}" /></div>
-        <div class="field"><label>Time</label><input type="time" id="m-time" value="${currentTime()}" /></div>
+        <div class="field"><label for="m-date">Date</label><input type="date" id="m-date" value="${today()}" /></div>
+        <div class="field"><label for="m-time">Time</label><input type="time" id="m-time" value="${currentTime()}" /></div>
       </div>
-      <button class="btn btn-primary" id="m-log-btn"><i class="ti ti-plus"></i> Log activity</button>
+      <button class="btn btn-primary" id="m-log-btn"><i class="ti ti-plus" aria-hidden="true"></i> Log activity</button>
     </div>
 
     <div class="card" style="margin-top:16px">
@@ -117,11 +119,14 @@ function handleManualLog() {
   const qty = parseFloat(qtyInput.value);
   if (!qty || qty <= 0) {
     qtyInput.classList.add('input-error');
+    qtyInput.setAttribute('aria-invalid', 'true');
     $('#m-qty-err').classList.remove('hidden');
     shake(qtyInput);
+    qtyInput.focus();
     return;
   }
   qtyInput.classList.remove('input-error');
+  qtyInput.removeAttribute('aria-invalid');
   $('#m-qty-err').classList.add('hidden');
 
   const cat = $('#m-category').value;

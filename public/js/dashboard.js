@@ -20,8 +20,7 @@ import {
   esc,
   mdToHtml,
 } from './utils.js';
-
-const $ = (sel, root = document) => root.querySelector(sel);
+import { $, emptyState } from './dom.js';
 
 export function renderDashboard() {
   const panel = document.getElementById('tab-dashboard');
@@ -49,16 +48,16 @@ export function renderDashboard() {
       ${metricCard('Eco score', ecoScore, '/ 100')}
     </div>
 
-    <h3 class="section-title"><i class="ti ti-chart-bar"></i>Last 7 days</h3>
+    <h2 class="section-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Last 7 days</h2>
     <div class="card" id="daily-chart"></div>
 
     <div class="grid-2" style="margin-top:16px">
       <div class="card">
-        <h3 class="section-title" style="margin-top:0"><i class="ti ti-chart-pie"></i>By category</h3>
+        <h2 class="section-title" style="margin-top:0"><i class="ti ti-chart-pie" aria-hidden="true"></i>By category</h2>
         <div id="cat-bars"></div>
       </div>
       <div class="card">
-        <h3 class="section-title" style="margin-top:0"><i class="ti ti-history"></i>Recent activity</h3>
+        <h2 class="section-title" style="margin-top:0"><i class="ti ti-history" aria-hidden="true"></i>Recent activity</h2>
         <div id="recent-logs"></div>
       </div>
     </div>
@@ -116,11 +115,15 @@ function renderDailyChart() {
     return;
   }
 
-  slot.innerHTML = `<div class="bar-chart">${data
+  const summary = data
+    .map((d) => `${weekdayLabel(d.date)}: ${d.total.toFixed(1)} kg${d.date === today() ? ' (today)' : ''}`)
+    .join(', ');
+
+  slot.innerHTML = `<div class="bar-chart" role="img" aria-label="Daily CO₂e over the last 7 days. ${summary}.">${data
     .map((d) => {
       const pct = (d.total / max) * 100;
       const isToday = d.date === today();
-      return `<div class="bar-col ${isToday ? 'today' : ''}">
+      return `<div class="bar-col ${isToday ? 'today' : ''}" aria-hidden="true">
           <span class="bar-val">${d.total > 0 ? d.total.toFixed(1) : ''}</span>
           <div class="bar-fill" style="height:${pct}%"></div>
           <span class="bar-label">${weekdayLabel(d.date)}</span>
@@ -147,7 +150,7 @@ function renderCategoryBars(weekLogs, weeklyTotal) {
             <span style="text-transform:capitalize">${cat}</span>
             <span class="mono">${kg.toFixed(1)} kg · ${pct.toFixed(0)}%</span>
           </div>
-          <div class="cat-bar-track">
+          <div class="cat-bar-track" aria-hidden="true">
             <div class="cat-bar-inner bg-${CATEGORY_META[cat]?.color || 'transport'}" style="width:${pct}%"></div>
           </div>
         </div>`;
@@ -168,7 +171,7 @@ function renderRecentLogs(logs) {
     .map((l) => {
       const meta = CATEGORY_META[l.category] || {};
       return `<div class="log-row">
-          <div class="log-icon bg-${meta.color || 'transport'}"><i class="ti ${meta.icon || 'ti-circle'}"></i></div>
+          <div class="log-icon bg-${meta.color || 'transport'}"><i class="ti ${meta.icon || 'ti-circle'}" aria-hidden="true"></i></div>
           <div class="log-meta">
             <div class="name">${esc(l.activity)}</div>
             <div class="detail">${l.quantity} ${esc(l.unit)} · ${getRelativeDay(l.date)}</div>
@@ -193,8 +196,8 @@ async function renderAIInsight(weekLogs) {
   }
 
   slot.innerHTML = `<div class="card ai-insight">
-      <div class="ai-head"><i class="ti ti-sparkles"></i> AI insight</div>
-      <div><span class="spinner spinner-dark"></span> Analyzing your week…</div>
+      <div class="ai-head"><i class="ti ti-sparkles" aria-hidden="true"></i> AI insight</div>
+      <div role="status"><span class="spinner spinner-dark" aria-hidden="true"></span> Analyzing your week…</div>
     </div>`;
 
   const totals = getCategoryTotals(weekLogs);
@@ -226,11 +229,8 @@ async function renderAIInsight(weekLogs) {
 
 function insightCard(text) {
   return `<div class="card ai-insight">
-      <div class="ai-head"><i class="ti ti-sparkles"></i> AI insight</div>
+      <div class="ai-head"><i class="ti ti-sparkles" aria-hidden="true"></i> AI insight</div>
       <div class="md">${mdToHtml(text)}</div>
     </div>`;
 }
 
-function emptyState(icon, msg) {
-  return `<div class="empty-state"><i class="ti ${icon}"></i><p>${msg}</p></div>`;
-}

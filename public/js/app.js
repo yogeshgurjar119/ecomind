@@ -6,9 +6,9 @@
  */
 
 import { EMISSION_FACTORS } from './config.js';
-import { loadLogs, saveLogs, loadSettings, generateId } from './storage.js';
+import { saveLogs, loadSettings, generateId, migrateStorage } from './storage.js';
 import { refreshAIStatus } from './api.js';
-import { calcCO2, today, daysAgo } from './utils.js';
+import { calcCO2, daysAgo } from './utils.js';
 import { registerTab, showTab, showToast } from './ui.js';
 import { renderDashboard } from './dashboard.js';
 import { renderLog } from './log.js';
@@ -19,9 +19,27 @@ import { checkOnboarding } from './onboarding.js';
 import { initAmbience } from './ambience.js';
 
 function wireTabs() {
-  document.querySelectorAll('.tab-btn').forEach((btn) => {
+  const buttons = [...document.querySelectorAll('.tab-btn')];
+  buttons.forEach((btn) => {
     btn.addEventListener('click', () => showTab(btn.dataset.tab));
   });
+
+  // ARIA tabs keyboard support: Left/Right move between tabs, Home/End jump
+  // to first/last, moving focus and selection together (APG automatic activation).
+  document.getElementById('tab-nav')?.addEventListener('keydown', (e) => {
+    const current = buttons.indexOf(document.activeElement);
+    if (current < 0) return;
+    let next = null;
+    if (e.key === 'ArrowRight') next = (current + 1) % buttons.length;
+    else if (e.key === 'ArrowLeft') next = (current - 1 + buttons.length) % buttons.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = buttons.length - 1;
+    if (next === null) return;
+    e.preventDefault();
+    buttons[next].focus();
+    showTab(buttons[next].dataset.tab);
+  });
+
   registerTab('dashboard', renderDashboard);
   registerTab('log', renderLog);
   registerTab('insights', renderInsights);
@@ -30,6 +48,7 @@ function wireTabs() {
 }
 
 async function init() {
+  migrateStorage(); // keep stored data forward-compatible across deploys
   await refreshAIStatus();
   wireTabs();
   initAmbience();

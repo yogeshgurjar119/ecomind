@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#app-main">Skip to content</a>
     <div id="app">
       <!-- ── Header + tab navigation ─────────────────────────── -->
       <header id="app-header">
@@ -31,36 +32,39 @@
           />
           <span class="brand-name">EcoMind</span>
         </div>
-        <nav id="tab-nav" aria-label="Primary">
-          <button class="tab-btn active" data-tab="dashboard">
-            <i class="ti ti-layout-dashboard"></i><span>Dashboard</span>
+        <nav id="tab-nav" role="tablist" aria-label="Primary">
+          <button class="tab-btn active" role="tab" id="tab-btn-dashboard" data-tab="dashboard" aria-controls="tab-dashboard" aria-selected="true" tabindex="0">
+            <i class="ti ti-layout-dashboard" aria-hidden="true"></i><span>Dashboard</span>
           </button>
-          <button class="tab-btn" data-tab="log">
-            <i class="ti ti-circle-plus"></i><span>Log</span>
+          <button class="tab-btn" role="tab" id="tab-btn-log" data-tab="log" aria-controls="tab-log" aria-selected="false" tabindex="-1">
+            <i class="ti ti-circle-plus" aria-hidden="true"></i><span>Log</span>
           </button>
-          <button class="tab-btn" data-tab="insights">
-            <i class="ti ti-chart-bar"></i><span>Insights</span>
+          <button class="tab-btn" role="tab" id="tab-btn-insights" data-tab="insights" aria-controls="tab-insights" aria-selected="false" tabindex="-1">
+            <i class="ti ti-chart-bar" aria-hidden="true"></i><span>Insights</span>
           </button>
-          <button class="tab-btn" data-tab="coach">
-            <i class="ti ti-message-chatbot"></i><span>Coach</span>
+          <button class="tab-btn" role="tab" id="tab-btn-coach" data-tab="coach" aria-controls="tab-coach" aria-selected="false" tabindex="-1">
+            <i class="ti ti-message-chatbot" aria-hidden="true"></i><span>Coach</span>
           </button>
-          <button class="tab-btn" data-tab="settings">
-            <i class="ti ti-settings"></i><span>Settings</span>
+          <button class="tab-btn" role="tab" id="tab-btn-settings" data-tab="settings" aria-controls="tab-settings" aria-selected="false" tabindex="-1">
+            <i class="ti ti-settings" aria-hidden="true"></i><span>Settings</span>
           </button>
         </nav>
       </header>
 
       <!-- ── Tab panels ──────────────────────────────────────── -->
-      <main id="app-main">
-        <section id="tab-dashboard" class="tab-panel"></section>
-        <section id="tab-log" class="tab-panel hidden"></section>
-        <section id="tab-insights" class="tab-panel hidden"></section>
-        <section id="tab-coach" class="tab-panel hidden"></section>
-        <section id="tab-settings" class="tab-panel hidden"></section>
+      <main id="app-main" tabindex="-1">
+        <section id="tab-dashboard" class="tab-panel" role="tabpanel" tabindex="0" aria-labelledby="tab-btn-dashboard"></section>
+        <section id="tab-log" class="tab-panel hidden" role="tabpanel" tabindex="0" aria-labelledby="tab-btn-log"></section>
+        <section id="tab-insights" class="tab-panel hidden" role="tabpanel" tabindex="0" aria-labelledby="tab-btn-insights"></section>
+        <section id="tab-coach" class="tab-panel hidden" role="tabpanel" tabindex="0" aria-labelledby="tab-btn-coach"></section>
+        <section id="tab-settings" class="tab-panel hidden" role="tabpanel" tabindex="0" aria-labelledby="tab-btn-settings"></section>
       </main>
 
       <!-- ── Toast container ─────────────────────────────────── -->
-      <div id="toast-container" aria-live="polite"></div>
+      <div id="toast-container">
+        <div id="toast-polite" role="status" aria-live="polite"></div>
+        <div id="toast-assertive" role="alert" aria-live="assertive"></div>
+      </div>
     </div>
 
     <!-- ── Onboarding modal ──────────────────────────────────── -->

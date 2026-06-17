@@ -10,8 +10,7 @@ import { callAI, isAIEnabled, refreshAIStatus } from './api.js';
 import { esc } from './utils.js';
 import { showToast, setLoading } from './ui.js';
 import { renderDashboard } from './dashboard.js';
-
-const $ = (sel, root = document) => root.querySelector(sel);
+import { $ } from './dom.js';
 
 export function renderSettings() {
   const panel = document.getElementById('tab-settings');
@@ -26,29 +25,30 @@ export function renderSettings() {
     <div class="settings-grid">
       <!-- Profile -->
       <div class="card">
-        <h3 class="section-title" style="margin-top:0"><i class="ti ti-user"></i>Profile</h3>
-        <div class="field"><label>Name</label><input id="s-name" value="${esc(s.name)}" /></div>
+        <h2 class="section-title" style="margin-top:0"><i class="ti ti-user" aria-hidden="true"></i>Profile</h2>
+        <div class="field"><label for="s-name">Name</label><input id="s-name" autocomplete="name" value="${esc(s.name)}" /></div>
         <div class="field">
-          <label>Country (sets electricity grid factor)</label>
-          <select id="s-country">
+          <label for="s-country">Country (sets electricity grid factor)</label>
+          <select id="s-country" autocomplete="country-name">
             ${Object.keys(COUNTRY_FACTORS)
               .map((c) => `<option ${c === s.country ? 'selected' : ''}>${c}</option>`)
               .join('')}
           </select>
         </div>
         <div class="field">
-          <label>Daily CO₂ goal</label>
+          <label for="s-goal">Daily CO₂ goal</label>
           <div class="slider-row">
-            <input type="range" id="s-goal" min="5" max="30" step="1" value="${s.daily_goal_kg}" />
+            <input type="range" id="s-goal" min="5" max="30" step="1" value="${s.daily_goal_kg}"
+              aria-valuetext="${s.daily_goal_kg} kg" aria-describedby="s-goal-val" />
             <span class="slider-val" id="s-goal-val">${s.daily_goal_kg} kg</span>
           </div>
         </div>
-        <button class="btn btn-primary" id="s-save"><i class="ti ti-device-floppy"></i> Save profile</button>
+        <button class="btn btn-primary" id="s-save"><i class="ti ti-device-floppy" aria-hidden="true"></i> Save profile</button>
       </div>
 
       <!-- AI -->
       <div class="card">
-        <h3 class="section-title" style="margin-top:0"><i class="ti ti-brain"></i>EcoMind AI</h3>
+        <h2 class="section-title" style="margin-top:0"><i class="ti ti-brain" aria-hidden="true"></i>EcoMind AI</h2>
         <p style="margin:0 0 10px">
           Status:
           <span class="badge ${aiOn ? 'badge-green' : 'badge-gray'}">
@@ -56,30 +56,25 @@ export function renderSettings() {
           </span>
         </p>
         <div class="btn-group">
-          <button class="btn btn-secondary" id="s-test"><i class="ti ti-plug"></i> Test connection</button>
-        </div>
-        <div class="info-box">
-          The API key is stored securely on the server in <code>.env</code> as
-          <code>NVIDIA_API_KEY</code>, never in your browser. Get a free key at
-          <strong>build.nvidia.com</strong> — 1000 free calls/month, no credit card.
+          <button class="btn btn-secondary" id="s-test"><i class="ti ti-plug" aria-hidden="true"></i> Test connection</button>
         </div>
       </div>
 
       <!-- Data -->
       <div class="card">
-        <h3 class="section-title" style="margin-top:0"><i class="ti ti-database"></i>Data management</h3>
+        <h2 class="section-title" style="margin-top:0"><i class="ti ti-database" aria-hidden="true"></i>Data management</h2>
         <p class="panel-sub">${logs.length} total activities logged across ${days} ${days === 1 ? 'day' : 'days'}.</p>
         <div class="btn-group">
-          <button class="btn btn-secondary" id="s-export"><i class="ti ti-download"></i> Export JSON</button>
-          <button class="btn btn-secondary" id="s-import"><i class="ti ti-upload"></i> Import JSON</button>
-          <button class="btn btn-danger" id="s-clear"><i class="ti ti-trash"></i> Clear all data</button>
+          <button class="btn btn-secondary" id="s-export"><i class="ti ti-download" aria-hidden="true"></i> Export JSON</button>
+          <button class="btn btn-secondary" id="s-import"><i class="ti ti-upload" aria-hidden="true"></i> Import JSON</button>
+          <button class="btn btn-danger" id="s-clear"><i class="ti ti-trash" aria-hidden="true"></i> Clear all data</button>
         </div>
-        <input type="file" id="s-file" accept="application/json" class="hidden" />
+        <input type="file" id="s-file" accept="application/json" class="hidden" aria-label="Import JSON file" />
       </div>
 
       <!-- About -->
       <div class="card">
-        <h3 class="section-title" style="margin-top:0"><i class="ti ti-info-circle"></i>About</h3>
+        <h2 class="section-title" style="margin-top:0"><i class="ti ti-info-circle" aria-hidden="true"></i>About</h2>
         <div class="about-list">
           <div><strong>EcoMind</strong> — v${APP_VERSION}</div>
           <div>Emission factors from IPCC, IEA, Our World in Data</div>
@@ -96,7 +91,10 @@ export function renderSettings() {
 
 function wireProfile() {
   const goal = $('#s-goal');
-  goal.addEventListener('input', () => ($('#s-goal-val').textContent = `${goal.value} kg`));
+  goal.addEventListener('input', () => {
+    $('#s-goal-val').textContent = `${goal.value} kg`;
+    goal.setAttribute('aria-valuetext', `${goal.value} kg`); // announce the unit, not just the number
+  });
   $('#s-save').addEventListener('click', () => {
     const s = loadSettings();
     s.name = $('#s-name').value.trim() || 'User';

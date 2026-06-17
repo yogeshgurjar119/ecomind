@@ -18,8 +18,7 @@ import {
   mdToHtml,
 } from './utils.js';
 import { showToast, setLoading } from './ui.js';
-
-const $ = (sel, root = document) => root.querySelector(sel);
+import { $, emptyState } from './dom.js';
 
 const CATEGORY_TIPS = {
   transport: 'Combine trips, carpool, or swap one car journey a week for public transport or cycling.',
@@ -36,10 +35,10 @@ export function renderInsights() {
   if (!logs.length) {
     panel.innerHTML = `
       <h1 class="panel-title">Insights</h1>
-      <div class="card"><div class="empty-state">
-        <i class="ti ti-chart-dots"></i>
-        <p>Log a few activities to unlock benchmarks, trends and analysis.</p>
-      </div></div>`;
+      <div class="card">${emptyState(
+        'ti-chart-dots',
+        'Log a few activities to unlock benchmarks, trends and analysis.'
+      )}</div>`;
     return;
   }
 
@@ -52,36 +51,36 @@ export function renderInsights() {
     <p class="panel-sub">How you compare, and where to focus.</p>
 
     <div class="card">
-      <h3 class="section-title" style="margin-top:0"><i class="ti ti-scale"></i>Benchmarks</h3>
+      <h2 class="section-title" style="margin-top:0"><i class="ti ti-scale" aria-hidden="true"></i>Benchmarks</h2>
       <div id="benchmarks"></div>
     </div>
 
     <div class="card" style="margin-top:16px">
-      <h3 class="section-title" style="margin-top:0"><i class="ti ti-timeline"></i>Last 14 days</h3>
+      <h2 class="section-title" style="margin-top:0"><i class="ti ti-timeline" aria-hidden="true"></i>Last 14 days</h2>
       <div id="trend"></div>
     </div>
 
     <div class="grid-2" style="margin-top:16px">
       <div class="card">
-        <h3 class="section-title" style="margin-top:0"><i class="ti ti-chart-pie-2"></i>Category split</h3>
+        <h2 class="section-title" style="margin-top:0"><i class="ti ti-chart-pie-2" aria-hidden="true"></i>Category split</h2>
         <div id="cat-analysis"></div>
       </div>
       <div class="card">
-        <h3 class="section-title" style="margin-top:0"><i class="ti ti-trophy"></i>Biggest single entries</h3>
+        <h2 class="section-title" style="margin-top:0"><i class="ti ti-trophy" aria-hidden="true"></i>Biggest single entries</h2>
         <div id="top-entries"></div>
       </div>
     </div>
 
     <div class="card" style="margin-top:16px">
-      <h3 class="section-title" style="margin-top:0"><i class="ti ti-bulb"></i>Focus this week</h3>
+      <h2 class="section-title" style="margin-top:0"><i class="ti ti-bulb" aria-hidden="true"></i>Focus this week</h2>
       <div id="worst-cat"></div>
     </div>
 
     <div class="card" style="margin-top:16px">
-      <h3 class="section-title" style="margin-top:0"><i class="ti ti-sparkles"></i>AI deep analysis</h3>
+      <h2 class="section-title" style="margin-top:0"><i class="ti ti-sparkles" aria-hidden="true"></i>AI deep analysis</h2>
       ${
         isAIEnabled()
-          ? `<button class="btn btn-primary" id="report-btn"><i class="ti ti-report"></i> Generate personalized report</button>
+          ? `<button class="btn btn-primary" id="report-btn"><i class="ti ti-report" aria-hidden="true"></i> Generate personalized report</button>
              <div id="report-out" style="margin-top:12px"></div>`
           : `<p class="panel-sub" style="margin:0">Add your NVIDIA key to <code>.env</code> to generate a personalized report.</p>`
       }
@@ -92,7 +91,7 @@ export function renderInsights() {
   renderTrend(settings.daily_goal_kg);
   renderCategoryAnalysis(weekLogs, weeklyTotal);
   renderTopEntries(logs);
-  renderWorstCategory(weekLogs, settings);
+  renderWorstCategory(weekLogs);
 
   if (isAIEnabled()) {
     $('#report-btn').addEventListener('click', () =>
@@ -135,7 +134,7 @@ async function renderBenchmarks(annualTonnes, settings) {
               <span>${b.you ? '<strong>You</strong>' : esc(b.name)}${tag} ${badge}</span>
               <span class="mono">${b.tonnes.toFixed(2)} t</span>
             </div>
-            <div class="bench-track"><div class="bench-inner" style="width:${pct}%;background:${color}"></div></div>
+            <div class="bench-track" aria-hidden="true"><div class="bench-inner" style="width:${pct}%;background:${color}"></div></div>
           </div>`;
       })
       .join('');
@@ -195,15 +194,21 @@ function renderTrend(goal) {
     )
     .join('');
 
+  const overCount = data.filter((d) => d.total > goal).length;
+  const summary = data
+    .map((d) => `${weekdayLabel(d.date)} ${d.total.toFixed(1)} kg${d.total > goal ? ' (over goal)' : ''}`)
+    .join(', ');
+
   $('#trend').innerHTML = `
     <div class="trend-chart">
-      <svg class="trend-svg" viewBox="0 0 ${W} ${H + 24}" preserveAspectRatio="none">
+      <svg class="trend-svg" viewBox="0 0 ${W} ${H + 24}" preserveAspectRatio="none"
+        role="img" aria-label="14-day CO₂e trend against a daily goal of ${goal} kg. ${summary}.">
         <line x1="0" y1="${goalY}" x2="${W}" y2="${goalY}" stroke="var(--warning)" stroke-width="1.5" stroke-dasharray="5 4" />
         <polyline points="${points}" fill="none" stroke="var(--accent)" stroke-width="2" />
         ${dots}${labels}
       </svg>
     </div>
-    <div class="info-box">Dashed line = your daily goal of ${goal} kg. Red dots exceeded it.</div>`;
+    <div class="info-box">Dashed line = your daily goal of ${goal} kg. ${overCount} of ${data.length} days were over goal.</div>`;
 }
 
 function renderCategoryAnalysis(weekLogs, weeklyTotal) {
@@ -211,7 +216,7 @@ function renderCategoryAnalysis(weekLogs, weeklyTotal) {
   const totals = getCategoryTotals(weekLogs);
   const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
   if (!entries.length) {
-    slot.innerHTML = `<div class="empty-state"><i class="ti ti-chart-pie-off"></i><p>No data this week.</p></div>`;
+    slot.innerHTML = emptyState('ti-chart-pie-off', 'No data this week.');
     return;
   }
 
@@ -227,14 +232,15 @@ function renderCategoryAnalysis(weekLogs, weeklyTotal) {
   const legend = entries
     .map(
       ([cat, kg]) =>
-        `<div class="item"><span class="dot" style="background:${colorVar(cat)}"></span>
+        `<div class="item"><span class="dot" style="background:${colorVar(cat)}" aria-hidden="true"></span>
           <span style="text-transform:capitalize">${cat}</span>
           <span class="mono" style="margin-left:auto">${((kg / weeklyTotal) * 100).toFixed(0)}%</span></div>`
     )
     .join('');
 
+  // The pie is decorative; the legend beside it carries the same data as text.
   slot.innerHTML = `<div class="pie-wrap">
-      <div class="pie" style="background:conic-gradient(${segments.join(',')})"></div>
+      <div class="pie" style="background:conic-gradient(${segments.join(',')})" aria-hidden="true"></div>
       <div class="pie-legend">${legend}</div>
     </div>`;
 }
@@ -253,7 +259,7 @@ function renderTopEntries(logs) {
     .join('');
 }
 
-function renderWorstCategory(weekLogs, settings) {
+function renderWorstCategory(weekLogs) {
   const totals = getCategoryTotals(weekLogs);
   const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
   if (!entries.length) {
@@ -294,7 +300,7 @@ async function handleAIReport(annualTonnes, weeklyTotal, weekLogs, settings) {
       650
     );
     out.innerHTML = `<div class="card ai-insight"><div class="md">${mdToHtml(text)}</div></div>
-      <button class="btn btn-secondary" id="report-regen" style="margin-top:10px"><i class="ti ti-refresh"></i> Regenerate</button>`;
+      <button class="btn btn-secondary" id="report-regen" style="margin-top:10px"><i class="ti ti-refresh" aria-hidden="true"></i> Regenerate</button>`;
     $('#report-regen').addEventListener('click', () =>
       handleAIReport(annualTonnes, weeklyTotal, weekLogs, settings)
     );

@@ -13,20 +13,29 @@ export function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach((p) => p.classList.add('hidden'));
   document.getElementById(`tab-${name}`)?.classList.remove('hidden');
 
+  // Reflect the selected tab programmatically (ARIA tabs pattern), not just
+  // visually, and keep a roving tabindex so only the active tab is tabbable.
   document.querySelectorAll('.tab-btn').forEach((b) => {
-    b.classList.toggle('active', b.dataset.tab === name);
+    const selected = b.dataset.tab === name;
+    b.classList.toggle('active', selected);
+    b.setAttribute('aria-selected', selected ? 'true' : 'false');
+    b.tabIndex = selected ? 0 : -1;
   });
 
   tabRenderers[name]?.();
 }
 
 export function showToast(msg, type = 'success') {
-  const container = document.getElementById('toast-container');
+  // Errors go to the assertive live region (announced immediately); other
+  // statuses go to the polite one so they don't interrupt the user.
+  const container = document.getElementById(
+    type === 'error' ? 'toast-assertive' : 'toast-polite'
+  );
   const el = document.createElement('div');
   el.className = `toast ${type}`;
   const icon =
     type === 'error' ? 'ti-alert-circle' : type === 'warning' ? 'ti-alert-triangle' : 'ti-check';
-  el.innerHTML = `<i class="ti ${icon}"></i><span></span>`;
+  el.innerHTML = `<i class="ti ${icon}" aria-hidden="true"></i><span></span>`;
   el.querySelector('span').textContent = msg;
   container.appendChild(el);
   setTimeout(() => {
@@ -41,9 +50,11 @@ export function setLoading(btn, isLoading, idleHTML) {
   if (isLoading) {
     btn.dataset.idle = idleHTML ?? btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner"></span> Working…`;
+    btn.setAttribute('aria-busy', 'true');
+    btn.innerHTML = `<span class="spinner" aria-hidden="true"></span> Working…`;
   } else {
     btn.disabled = false;
+    btn.removeAttribute('aria-busy');
     btn.innerHTML = btn.dataset.idle ?? idleHTML ?? btn.innerHTML;
   }
 }
